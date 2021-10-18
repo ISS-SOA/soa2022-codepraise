@@ -1,17 +1,26 @@
 # frozen_string_literal: true
 
-require 'minitest/autorun'
-require 'minitest/rg'
-require 'yaml'
-require_relative '../lib/github_api'
-
-USERNAME = 'soumyaray'
-PROJECT_NAME = 'YPBT-app'
-CONFIG = YAML.safe_load(File.read('config/secrets.yml'))
-GITHUB_TOKEN = CONFIG['GITHUB_TOKEN']
-CORRECT = YAML.safe_load(File.read('spec/fixtures/github_results.yml'))
+require_relative 'spec_helper'
 
 describe 'Tests Github API library' do
+  VCR.configure do |c|
+    c.cassette_library_dir = CASSETTES_FOLDER
+    c.hook_into :webmock
+
+    c.filter_sensitive_data('<GITHUB_TOKEN>') { GITHUB_TOKEN }
+    c.filter_sensitive_data('<GITHUB_TOKEN_ESC>') { CGI.escape(GITHUB_TOKEN) }
+  end
+
+  before do
+    VCR.insert_cassette CASSETTE_FILE,
+                        record: :new_episodes,
+                        match_requests_on: %i[method uri headers]
+  end
+
+  after do
+    VCR.eject_cassette
+  end
+
   describe 'Project information' do
     it 'HAPPY: should provide correct project attributes' do
       project = CodePraise::GithubApi.new(GITHUB_TOKEN)
@@ -23,13 +32,13 @@ describe 'Tests Github API library' do
     it 'SAD: should raise exception on incorrect project' do
       _(proc do
         CodePraise::GithubApi.new(GITHUB_TOKEN).project('soumyaray', 'foobar')
-      end).must_raise CodePraise::GithubApi::Errors::NotFound
+      end).must_raise CodePraise::GithubApi::Response::NotFound
     end
 
     it 'SAD: should raise exception when unauthorized' do
       _(proc do
         CodePraise::GithubApi.new('BAD_TOKEN').project('soumyaray', 'foobar')
-      end).must_raise CodePraise::GithubApi::Errors::Unauthorized
+      end).must_raise CodePraise::GithubApi::Response::Unauthorized
     end
   end
 
