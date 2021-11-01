@@ -1,34 +1,31 @@
 # frozen_string_literal: true
 
 require_relative 'spec_helper'
+require_relative 'helpers/vcr_helper'
 
 describe 'Tests Github API library' do
-  VCR.configure do |c|
-    c.cassette_library_dir = CASSETTES_FOLDER
-    c.hook_into :webmock
-
-    c.filter_sensitive_data('<GITHUB_TOKEN>') { GITHUB_TOKEN }
-    c.filter_sensitive_data('<GITHUB_TOKEN_ESC>') { CGI.escape(GITHUB_TOKEN) }
-  end
-
   before do
-    VCR.insert_cassette CASSETTE_FILE,
-                        record: :new_episodes,
-                        match_requests_on: %i[method uri headers]
+    VcrHelper.configure_vcr_for_github
   end
 
   after do
-    VCR.eject_cassette
+    VcrHelper.eject_vcr
   end
 
   describe 'Project information' do
+    before do
+      @project = CodePraise::Github::ProjectMapper
+        .new(GITHUB_TOKEN)
+        .find(USERNAME, PROJECT_NAME)
+    end
+
     it 'HAPPY: should provide correct project attributes' do
-      project =
-        CodePraise::Github::ProjectMapper
-          .new(GITHUB_TOKEN)
-          .find(USERNAME, PROJECT_NAME)
-      _(project.size).must_equal CORRECT['size']
-      _(project.git_url).must_equal CORRECT['git_url']
+      _(@project.size).must_equal CORRECT['size']
+      _(@project.ssh_url).must_equal CORRECT['git_url']
+    end
+
+    it 'HAPPY: project should not have sensitive attributes' do
+      _(@project.to_attr_hash.keys & %i[id owner contributors]).must_be_empty
     end
 
     it 'BAD: should raise exception on incorrect project' do
@@ -59,13 +56,17 @@ describe 'Tests Github API library' do
       _(@project.owner).must_be_kind_of CodePraise::Entity::Member
     end
 
+    it 'HAPPY: members should not have sensitive attributes' do
+      _(@project.owner.to_attr_hash).wont_include :id
+    end
+
     it 'HAPPY: should identify owner' do
       _(@project.owner.username).wont_be_nil
       _(@project.owner.username).must_equal CORRECT['owner']['login']
     end
 
     it 'HAPPY: should identify members' do
-      members = @project.members
+      members = @project.contributors
       _(members.count).must_equal CORRECT['contributors'].count
 
       usernames = members.map(&:username)
