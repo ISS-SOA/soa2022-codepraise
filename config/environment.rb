@@ -1,34 +1,39 @@
 # frozen_string_literal: true
 
 require 'figaro'
+require 'logger'
+require 'rack/session'
 require 'roda'
 require 'sequel'
-require 'yaml'
+# require 'delegate' # needed until Rack 2.3 fixes delegateclass bug
 
 module CodePraise
-  # Configuration for the App
+  # Environment-specific configuration
   class App < Roda
     plugin :environments
 
-    # rubocop:disable Lint/ConstantDefinitionInBlock
-    configure do
-      # Environment variables setup
-      Figaro.application = Figaro::Application.new(
-        environment:,
-        path: File.expand_path('config/secrets.yml')
-      )
-      Figaro.load
-      def self.config = Figaro.env
+    # Environment variables setup
+    Figaro.application = Figaro::Application.new(
+      environment:,
+      path: File.expand_path('config/secrets.yml')
+    )
+    Figaro.load
+    def self.config = Figaro.env
 
-      configure :development, :test do
-        ENV['DATABASE_URL'] = "sqlite://#{config.DB_FILENAME}"
-      end
+    use Rack::Session::Cookie, secret: config.SESSION_SECRET
 
-      # Database Setup
-      DB = Sequel.connect(ENV.fetch('DATABASE_URL'))
-      # deliberately :reek:UncommunicativeMethodName calling method DB
-      def self.DB = DB # rubocop:disable Naming/MethodName
+    # Database Setup
+    configure :development, :test do
+      require 'pry'; # for breakpoints
+      ENV['DATABASE_URL'] = "sqlite://#{config.DB_FILENAME}"
     end
-    # rubocop:enable Lint/ConstantDefinitionInBlock
+
+    DB = Sequel.connect(ENV.fetch('DATABASE_URL'))
+    # deliberately :reek:UncommunicativeMethodName calling method DB
+    def self.DB = DB # rubocop:disable Naming/MethodName
+
+    # Logger Setup
+    LOGGER = Logger.new($stderr)
+    def self.logger = LOGGER
   end
 end

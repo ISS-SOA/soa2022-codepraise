@@ -23,6 +23,13 @@ module CodePraise
         rebuild_entity(db_project)
       end
 
+      def self.find_full_names(full_names)
+        full_names.map do |fullname|
+          owner_name, project_name = fullname.split('/')
+          find_full_name(owner_name, project_name)
+        end.compact
+      end
+
       def self.find(entity)
         find_origin_id(entity.origin_id)
       end

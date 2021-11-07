@@ -9,9 +9,10 @@ module VcrHelper
   GITUB_CASSETTE = 'github_api'
 
   def self.setup_vcr
-    VCR.configure do |config|
-      config.cassette_library_dir = CASSETTES_FOLDER
-      config.hook_into :webmock
+    VCR.configure do |vcr_config|
+      vcr_config.cassette_library_dir = CASSETTES_FOLDER
+      vcr_config.hook_into :webmock
+      vcr_config.ignore_localhost = true # for acceptance tests
     end
   end
 

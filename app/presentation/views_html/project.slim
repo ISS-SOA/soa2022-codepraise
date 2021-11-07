@@ -1,0 +1,63 @@
+.container
+  .row
+    h2
+      span.project.owner
+        = "#{proj_folder.owner_name}: "
+      span.project.name style="padding-left:20px"
+        = proj_folder.project_name
+  .container
+    .row
+      .col-lg-2.col-md-2.col-sm-6
+        span.project.attribute Repo:
+      .col-lg-10.col-md-10.col-sm-6
+        span
+          a.project.detail href=proj_folder.http_url #{proj_folder.http_url}
+    .row.top-buffer
+      .col-lg-2.col-md-2.col-sm-6
+        span.project.attribute Members:
+      .col-lg-10.col-md-10.col-sm-6
+        .row
+          - proj_folder.contributors.each do |contributor|
+            span style="padding-left: 15px;"
+              a.project.detail href="#{contributor.github_profile_url}"
+                = "#{contributor.username}"
+  
+  table.table id="contribution_table"
+    thead
+      tr
+        th
+        - proj_folder.contributors.each do |contributor|
+          th.contributor.username #{contributor.username}
+    tbody
+      - if proj_folder.any_subfolders?
+        tr.contributions.table_header
+          td
+            span.contributions.table_header Folders
+          - (proj_folder.contributors.count).times do
+            td
+        - proj_folder.subfolders.each do |subfolder|
+          tr
+            td.folder.name
+              a href="#{subfolder.full_path}"
+                span #{subfolder.rel_path}/
+            - proj_folder.contributors.each do |contributor|
+              td.folder.contribution
+                span.percent #{subfolder.percent_credit_of(contributor)}%
+                br
+                span #{subfolder.num_lines_by(contributor)}
+        tr
+          - (proj_folder.num_contributors + 1).times do
+            td
+      tr.contributions.table_header
+        td
+          span.contributions.table_header Files
+        - proj_folder.contributors.each do |contributor|
+          td.contribution
+            span #{proj_folder.num_lines_by(contributor)}
+      - proj_folder.files.each do |file|
+        tr
+          td.file.name
+            span #{file.filename}
+          - proj_folder.contributors.each do |contributor|
+            td.file.contribution
+              span #{file.num_lines_by(contributor)}

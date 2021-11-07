@@ -22,6 +22,7 @@ module CodePraise
 
       def percent_credit_of(contributor)
         return 0 if line_count == 0 # for files with no creditable lines
+
         ((credits_for(contributor).to_f / line_count) * 100).round
       end
     end

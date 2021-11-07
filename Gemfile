@@ -5,10 +5,11 @@ ruby File.read('.ruby-version').strip
 
 # Configuration and Utilities
 gem 'figaro', '~> 1.2'
-gem 'rake'
+gem 'rake', '~> 13.0'
 
 # Web Application
 gem 'puma', '~> 6'
+gem 'rack-session', '~> 0.3'
 gem 'roda', '~> 3'
 gem 'slim', '~> 4'
 
@@ -29,7 +30,7 @@ group :development, :test do
 end
 
 group :production do
-  gem 'pg'
+  gem 'pg', '~> 1.2'
 end
 
 # Testing
@@ -37,8 +38,12 @@ group :test do
   gem 'minitest', '~> 5'
   gem 'minitest-rg', '~> 5'
   gem 'simplecov', '~> 0'
-  gem 'vcr', '~> 6'
-  gem 'webmock', '~> 3'
+  gem 'vcr', '~> 6.0'
+  gem 'webmock', '~> 3.0'
+
+  gem 'headless', '~> 2.3'
+  gem 'watir', '~> 7.0'
+  gem 'webdrivers', '~> 5.0'
 end
 
 group :development do
