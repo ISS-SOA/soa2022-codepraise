@@ -3,26 +3,44 @@
 AllCops:
   TargetRubyVersion: 3.1
   NewCops: enable
+  Include:
+    - 'Gemfile'
+    - 'Rakefile'
+    - '**/*.rb'
   Exclude:
     - '_snippets/**/*'
+    - 'app/infrastructure/git/repostore/**/*'
   Include:
   - 'Gemfile'
   - 'Rakefile'
   - '**/*.rb'
 
-# ignore block length in test code only
+# Ignore block length where unavoidable (e.g., frameworks using blocks)
 Metrics/BlockLength:
   Enabled: true
   Exclude:
     - 'spec/**/*'
-    - 'Rakefile'
+    - Rakefile
+    - app/controllers/**/*.rb # Roda's nested controllers require large blocks
+    - spec/**/* # Minitest's nested test structure requires large blocks
+    - Rakefile # Rake namespaces produce large blocks
 
 # See: https://www.rubydoc.info/gems/rubocop/RuboCop/Cop/Layout/MultilineMethodCallIndentation
 Layout/MultilineMethodCallIndentation:
   Enabled: true
   EnforcedStyle: indented
 
+Layout/HashAlignment:
+  Enabled: true
+  EnforcedHashRocketStyle: table
+
 Style/HashSyntax:
   Enabled: true
   Exclude:
-    - 'Rakefile'
+    - Rakefile
+
+Style/SymbolArray:
+  Enabled: true
+  Exclude:
+    - Rakefile
+    - app/infrastructure/database/migrations/*.rb

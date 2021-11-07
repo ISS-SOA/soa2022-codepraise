@@ -10,8 +10,10 @@ def gh_api_path(path)
 end
 
 def call_gh_url(config, url)
-  HTTP.headers('Accept' => 'application/vnd.github.v3+json',
-               'Authorization' => "token #{config['GITHUB_TOKEN']}").get(url)
+  HTTP.headers(
+    'Accept'        => 'application/vnd.github.v3+json',
+    'Authorization' => "token #{config['GITHUB_TOKEN']}"
+  ).get(url)
 end
 
 gh_response = {}

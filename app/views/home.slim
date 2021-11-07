@@ -25,7 +25,7 @@
             th Contributors
         tbody
           - projects.each.with_index do |project, index|
-            tr class="table-row project_row" data-href="project/#{project.owner.username}/#{project.name}" id="project[#{index}].row"
+            tr class="table-row project_row" data-href="project/#{project.fullname}" id="project[#{index}].row"
               td id='td_owner'
                 span class="project_table_owner" id="project[#{index}].owner"
                   = project.owner.username

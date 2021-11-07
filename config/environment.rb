@@ -26,6 +26,7 @@ module CodePraise
 
       # Database Setup
       DB = Sequel.connect(ENV.fetch('DATABASE_URL'))
+      # deliberately :reek:UncommunicativeMethodName calling method DB
       def self.DB = DB # rubocop:disable Naming/MethodName
     end
     # rubocop:enable Lint/ConstantDefinitionInBlock
