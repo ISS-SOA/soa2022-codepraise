@@ -3,7 +3,6 @@
 require 'roda'
 require 'slim'
 require 'slim/include'
-
 require_relative 'helpers'
 
 module CodePraise
@@ -20,7 +19,9 @@ module CodePraise
                     css: 'style.css', js: 'table_row.js'
     plugin :common_logger, $stderr
 
-    route do |routing| # rubocop:disable Metrics/BlockLength
+    use Rack::MethodOverride
+
+    route do |routing|
       routing.assets # load CSS
       response['Content-Type'] = 'text/html; charset=utf-8'
       routing.public
@@ -36,7 +37,7 @@ module CodePraise
           flash[:error] = result.failure
           viewable_projects = []
         else
-          projects = result.value!
+          projects = result.value!.projects
           if projects.none?
             flash.now[:notice] = 'Add a Github project to get started'
           end
@@ -48,7 +49,7 @@ module CodePraise
         view 'home', locals: { projects: viewable_projects }
       end
 
-      routing.on 'project' do # rubocop:disable Metrics/BlockLength
+      routing.on 'project' do
         routing.is do
           # POST /project/
           routing.post do
