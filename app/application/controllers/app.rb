@@ -96,7 +96,15 @@ module CodePraise
               routing.redirect '/'
             end
 
-            appraised = result.value!
+            appraisal = OpenStruct.new(result.value!)
+            if appraisal.response.processing?
+              flash[:notice] = 'Project is being cloned and analyzed, ' \
+                               'please check back in a moment.'
+              routing.redirect '/'
+            end
+
+            appraised = appraisal.appraised
+
             proj_folder = Views::ProjectFolderContributions.new(
               appraised[:project], appraised[:folder]
             )

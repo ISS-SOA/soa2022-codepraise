@@ -77,14 +77,30 @@ module CodePraise
       class Response < SimpleDelegator
         NotFound = Class.new(StandardError)
 
-        SUCCESS_CODES = (200..299).freeze
+        SUCCESS_CODES = 200..299
 
         def success?
           code.between?(SUCCESS_CODES.first, SUCCESS_CODES.last)
         end
 
+        def failure?
+          !success?
+        end
+
+        def ok?
+          code == 200
+        end
+
+        def added?
+          code == 201
+        end
+
+        def processing?
+          code == 202
+        end
+
         def message
-          payload['message']
+          JSON.parse(payload)['message']
         end
 
         def payload
