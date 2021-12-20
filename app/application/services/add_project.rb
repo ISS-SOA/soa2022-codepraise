@@ -28,9 +28,7 @@ module CodePraise
           .add_project(input[:owner_name], input[:project_name])
 
         result.success? ? Success(result.payload) : Failure(result.message)
-      rescue StandardError => e
-        puts e.inspect
-        puts e.backtrace
+      rescue StandardError
         Failure('Cannot add projects right now; please try again later')
       end
 

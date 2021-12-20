@@ -97,24 +97,27 @@ module CodePraise
             end
 
             appraisal = OpenStruct.new(result.value!)
+
             if appraisal.response.processing?
-              flash[:notice] = 'Project is being cloned and analyzed, ' \
-                               'please check back in a moment.'
-              routing.redirect '/'
+              flash.now[:notice] = 'The project is being appraised'
+            else
+              appraised = appraisal.appraised
+              proj_folder = Views::ProjectFolderContributions
+                .new(appraised[:project], appraised[:folder])
+
+              # Only use browser caching in production
+              App.configure :production do
+                response.expires 60, public: true
+              end
             end
 
-            appraised = appraisal.appraised
-
-            proj_folder = Views::ProjectFolderContributions.new(
-              appraised[:project], appraised[:folder]
+            processing = Views::AppraisalProcessing.new(
+              App.config, appraisal.response
             )
 
-            # Only use browser caching in production
-            App.configure :production do
-              response.expires 60, public: true
-            end
-
-            view 'project', locals: { proj_folder: }
+            # Show viewer for the project
+            view 'project', locals: { proj_folder: proj_folder,
+                                      processing: processing }
           end
         end
       end
