@@ -25,9 +25,7 @@ module CodePraise
       class DataMapper
         def initialize(data, token, gateway_class)
           @data = data
-          @member_mapper = MemberMapper.new(
-            token, gateway_class
-          )
+          @member_mapper = MemberMapper.new(token, gateway_class)
         end
 
         def build_entity

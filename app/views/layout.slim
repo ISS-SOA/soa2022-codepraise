@@ -1,0 +1,40 @@
+doctype html
+html
+  head
+    title CodePraise
+
+    / Bootstrap CSS and theme (United Theme)
+    link{
+      href="https://cdn.jsdelivr.net/npm/bootswatch@5.2.2/dist/cerulean/bootstrap.min.css"
+      rel="stylesheet" 
+      crossorigin="anonymous"
+    }
+    
+    / Custom CSS
+    / link rel='stylesheet' href='/presentation/assets/css/style.css'
+    == assets(:css)
+  body
+    / Popper
+    script{ 
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+      crossorigin="anonymous" 
+    }
+
+    / Bootstrap
+    script{
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+      crossorigin="anonymous"
+    }
+
+    .container id='html_body'
+      section
+        .row style="vertical-align: middle;"
+          .col-12
+            h1 
+              a.text-underline-hover href="/" CodePraise
+
+      section
+        == yield
+
+      footer
+        = "CodePraise is made for demonstration purposes. We cannot warrant full correctness of all content. CodePraise may use cookies for sessions but does not track users."
