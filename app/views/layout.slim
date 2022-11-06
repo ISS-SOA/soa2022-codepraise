@@ -1,6 +1,7 @@
 doctype html
 html
   head
+    meta charset="utf-8"
     title CodePraise
 
     / Bootstrap CSS and theme (United Theme)
@@ -9,11 +10,19 @@ html
       rel="stylesheet" 
       crossorigin="anonymous"
     }
-    
-    / Custom CSS
-    / link rel='stylesheet' href='/presentation/assets/css/style.css'
+
+    / Custom Assets
     == assets(:css)
+    == assets(:js, defer: true)
+
   body
+    / JQuery
+    script{ 
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" 
+      crossorigin="anonymous" 
+    }
+
     / Popper
     script{ 
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"

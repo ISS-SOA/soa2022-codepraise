@@ -15,8 +15,14 @@ Metrics/BlockLength:
   Enabled: true
   Exclude:
     - 'spec/**/*'
+    - 'Rakefile'
 
 # See: https://www.rubydoc.info/gems/rubocop/RuboCop/Cop/Layout/MultilineMethodCallIndentation
 Layout/MultilineMethodCallIndentation:
   Enabled: true
   EnforcedStyle: indented
+
+Style/HashSyntax:
+  Enabled: true
+  Exclude:
+    - 'Rakefile'
