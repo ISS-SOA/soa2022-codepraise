@@ -11,13 +11,15 @@ module CodePraise
       end
 
       def self.find_full_name(owner_name, project_name)
-        # SELECT * FROM `projects` LEFT JOIN `members`
-        # ON (`members`.`id` = `projects`.`owner_id`)
-        # WHERE ((`username` = 'owner_name') AND (`name` = 'project_name'))
+        # https://github.com/jeremyevans/sequel/blob/master/lib/sequel/dataset/graph.rb
+        # SELECT [from projects and members using aliases for conflicting names]
+        # FROM `projects` LEFT OUTER JOIN `members` ON (`members`.`id` = 12)
+        # WHERE ((`username` = 'owner') AND (`name` = 'proj'))
         db_project = Database::ProjectOrm
-          .left_join(:members, id: :owner_id)
+          .graph(:members, id: :owner_id)
           .where(username: owner_name, name: project_name)
           .first
+
         rebuild_entity(db_project)
       end
 
@@ -64,13 +66,13 @@ module CodePraise
         end
 
         def call
-          owner = Members.db_find_or_create(@entity.owner)
+          owner = Members.find_or_create(@entity.owner)
 
           create_project.tap do |db_project|
             db_project.update(owner:)
 
             @entity.contributors.each do |contributor|
-              db_project.add_contributor(Members.db_find_or_create(contributor))
+              db_project.add_contributor(Members.find_or_create(contributor))
             end
           end
         end

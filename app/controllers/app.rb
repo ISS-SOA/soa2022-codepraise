@@ -24,7 +24,7 @@ module CodePraise
         view 'home', locals: { projects: }
       end
 
-      routing.on 'project' do
+      routing.on 'project' do # rubocop:disable Metrics/BlockLength
         routing.is do
           # POST /project/
           routing.post do
@@ -42,7 +42,7 @@ module CodePraise
             Repository::For.entity(project).create(project)
 
             # Redirect viewer to project page
-            routing.redirect "project/#{project.owner.username}/#{project.name}"
+            routing.redirect "project/#{project.fullname}"
           end
         end
 
@@ -53,8 +53,18 @@ module CodePraise
             project = Repository::For.klass(Entity::Project)
               .find_full_name(owner_name, project_name)
 
+            # Clone remote repo from project information
+            gitrepo = GitRepo.new(project)
+            gitrepo.clone! unless gitrepo.exists_locally?
+
+            # Compile contributions for folder specified in route path
+            path = request.remaining_path
+            folder_name = path.empty? ? '' : path[1..]
+            folder = Mapper::Contributions
+              .new(gitrepo).for_folder(folder_name)
+
             # Show viewer the project
-            view 'project', locals: { project: }
+            view 'project', locals: { project: project, folder: folder }
           end
         end
       end

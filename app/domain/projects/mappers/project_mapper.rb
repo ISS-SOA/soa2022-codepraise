@@ -1,4 +1,4 @@
-# frozen_string_literal: false
+# frozen_string_literal: true
 
 require_relative 'member_mapper'
 
@@ -13,7 +13,7 @@ module CodePraise
       end
 
       def find(owner_name, project_name)
-        data = @gateway.repo_data(owner_name, project_name)
+        data = @gateway.git_repo_data(owner_name, project_name)
         build_entity(data)
       end
 
@@ -25,7 +25,9 @@ module CodePraise
       class DataMapper
         def initialize(data, token, gateway_class)
           @data = data
-          @member_mapper = MemberMapper.new(token, gateway_class)
+          @member_mapper = MemberMapper.new(
+            token, gateway_class
+          )
         end
 
         def build_entity
