@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'helpers/spec_helper'
+require_relative '../../helpers/spec_helper'
 
 CLONE_COMMAND = 'git clone --progress ssh://__.git ./test 2>&1'
 BLAME_COMMAND = 'git blame --line-porcelain test.rb'

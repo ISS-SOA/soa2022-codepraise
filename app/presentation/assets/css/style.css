@@ -2,10 +2,6 @@ h1 {
   font-weight: bold;
 }
 
-.text-underline-hover {
-  text-decoration: none;
-}
-
 .top-buffer { margin-top:20px; }
 
 .table-row {

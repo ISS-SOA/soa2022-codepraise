@@ -35,14 +35,21 @@ html
       crossorigin="anonymous"
     }
 
+    / FontAwesome
+    script{
+      src="https://kit.fontawesome.com/7d6f93cf88.js"
+      crossorigin="anonymous"
+    }
+
     .container id='html_body'
       section
         .row style="vertical-align: middle;"
           .col-12
-            h1 
+            h1 id='main_header'
               a.text-underline-hover href="/" CodePraise
 
       section
+        include :flash_bar
         == yield
 
       footer
