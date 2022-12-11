@@ -22,19 +22,22 @@ module Views
     end
 
     def full_path
-      "/project/#{@project.owner_name}/#{project_name}/#{@folder.path}"
+      PathPresenter.to_folder(
+        @project.owner_name, project_name, @folder.path
+      )
     end
 
     def rel_path
-      @folder.path
+      PathPresenter.path_leaf(@folder.path)
     end
 
     def percent_credit_of(contributor_view)
-      @folder.percent_credit_of(contributor_view.entity)
+      PercentPresenter.call(num_lines_by(contributor_view),
+                            @folder.total_credits)
     end
 
     def num_lines_by(contributor_view)
-      @folder.lines_by(contributor_view.entity).count
+      @folder.credit_share.share[contributor_view.entity.username]
     end
 
     def owner_name

@@ -8,16 +8,13 @@ module CodePraise
     class AppraiseProject
       include Dry::Transaction
 
-      step :ensure_watched_project
-      step :retrieve_remote_project
-      step :clone_remote
-      step :appraise_contributions
+      step :validate_project
+      step :retrieve_folder_appraisal
+      step :reify_appraisal
 
       private
 
-      # Steps
-
-      def ensure_watched_project(input)
+      def validate_project(input)
         if input[:watched_list].include? input[:requested].project_fullname
           Success(input)
         else
@@ -25,34 +22,21 @@ module CodePraise
         end
       end
 
-      def retrieve_remote_project(input)
-        input[:project] = Repository::For.klass(Entity::Project).find_full_name(
-          input[:requested].owner_name, input[:requested].project_name
-        )
+      def retrieve_folder_appraisal(input)
+        result = Gateway::Api.new(CodePraise::App.config)
+          .appraise(input[:requested])
 
-        input[:project] ? Success(input) : Failure('Project not found')
+        result.success? ? Success(result.payload) : Failure(result.message)
       rescue StandardError
-        Failure('Having trouble accessing the database')
+        Failure('Cannot appraise projects right now; please try again later')
       end
 
-      def clone_remote(input)
-        gitrepo = GitRepo.new(input[:project])
-        gitrepo.clone! unless gitrepo.exists_locally?
-
-        Success(input.merge(gitrepo:))
+      def reify_appraisal(folder_appraisal_json)
+        Representer::ProjectFolderContributions.new(OpenStruct.new)
+          .from_json(folder_appraisal_json)
+          .then { |folder_appraisal| Success(folder_appraisal) }
       rescue StandardError
-        App.logger.error error.backtrace.join("\n")
-        Failure('Could not clone this project')
-      end
-
-      def appraise_contributions(input)
-        input[:folder] = Mapper::Contributions
-          .new(input[:gitrepo]).for_folder(input[:requested].folder_name)
-
-        Success(input)
-      rescue StandardError
-        App.logger.error "Could not find: #{full_request_path(input)}"
-        Failure('Could not find that folder')
+        Failure('Error in our appraisal report -- please try again')
       end
 
       # Helper methods

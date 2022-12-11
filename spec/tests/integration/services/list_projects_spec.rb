@@ -1,76 +1,32 @@
 # frozen_string_literal: true
 
-require_relative '../../../helpers/spec_helper.rb'
-require_relative '../../../helpers/vcr_helper.rb'
-require_relative '../../../helpers/database_helper.rb'
+require_relative '../../../helpers/spec_helper'
 
-require 'ostruct'
+describe 'Integration test of ListProjects service and API gateway' do
+  it 'must return a list of projects' do
+    # GIVEN a project is in the database
+    CodePraise::Gateway::Api.new(CodePraise::App.config)
+      .add_project(USERNAME, PROJECT_NAME)
 
-describe 'AppraiseProject Service Integration Test' do
-  VcrHelper.setup_vcr
+    # WHEN we request a list of projects
+    list = [[USERNAME, PROJECT_NAME].join('/')]
+    res = CodePraise::Service::ListProjects.new.call(list)
 
-  before do
-    VcrHelper.configure_vcr_for_github(recording: :none)
+    # THEN we should see a single project in the list
+    _(res.success?).must_equal true
+    list = res.value!
+    _(list.projects.count).must_equal 1
+    _(list.projects.first.owner.username).must_equal USERNAME
   end
 
-  after do
-    VcrHelper.eject_vcr
-  end
+  it 'must return and empty list if we specify none' do
+    # WHEN we request a list of projects
+    list = []
+    res = CodePraise::Service::ListProjects.new.call(list)
 
-  describe 'Appraise a Project' do
-    before do
-      DatabaseHelper.wipe_database
-    end
-
-    it 'HAPPY: should return projects that are being watched' do
-      # GIVEN: a valid project exists locally and is being watched
-      gh_project = CodePraise::Github::ProjectMapper
-        .new(GITHUB_TOKEN)
-        .find(USERNAME, PROJECT_NAME)
-      db_project = CodePraise::Repository::For.entity(gh_project)
-        .create(gh_project)
-
-      watched_list = [USERNAME + '/' + PROJECT_NAME]
-
-      # WHEN: we request a list of all watched projects
-      result = CodePraise::Service::ListProjects.new.call(watched_list)
-
-      # THEN: we should see our project in the resulting list
-      _(result.success?).must_equal true
-      projects = result.value!
-      _(projects).must_include db_project
-    end
-
-    it 'HAPPY: should not return projects that are not being watched' do
-      # GIVEN: a valid project exists locally but is not being watched
-      gh_project = CodePraise::Github::ProjectMapper
-        .new(GITHUB_TOKEN)
-        .find(USERNAME, PROJECT_NAME)
-      CodePraise::Repository::For.entity(gh_project)
-        .create(gh_project)
-
-      watched_list = []
-
-      # WHEN: we request a list of all watched projects
-      result = CodePraise::Service::ListProjects.new.call(watched_list)
-
-      # THEN: it should return an empty list
-      _(result.success?).must_equal true
-      projects = result.value!
-      _(projects).must_equal []
-    end
-
-    it 'SAD: should not watched projects if they are not loaded' do
-      # GIVEN: we are watching a project that does not exist locally
-      watched_list = [USERNAME + '/' + PROJECT_NAME]
-
-      # WHEN: we request a list of all watched projects
-      result = CodePraise::Service::ListProjects.new.call(watched_list)
-
-      # THEN: it should return an empty list
-      _(result.success?).must_equal true
-      projects = result.value!
-      _(projects).must_equal []
-    end
+    # THEN we should see a no projects in the list
+    _(res.success?).must_equal true
+    list = res.value!
+    _(list.projects.count).must_equal 0
   end
 end

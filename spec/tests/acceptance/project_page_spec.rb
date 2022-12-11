@@ -8,7 +8,7 @@ describe 'Project Page Acceptance Tests' do
   include PageObject::PageFactory
 
   before do
-    DatabaseHelper.wipe_database
+    # DatabaseHelper.wipe_database
     # Headless error? https://github.com/leonid-shevtsov/headless/issues/80
     # @headless = Headless.new
     @browser = Watir::Browser.new
