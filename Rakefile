@@ -33,13 +33,16 @@ task :new_session_secret do
   puts "SESSION_SECRET: #{secret}"
 end
 
+desc 'Rackup application'
 namespace :run do
+  desc 'Rackup for development'
   task :dev do
-    sh "rerun -c --ignore 'coverage/*' --ignore 'repostore/*' -- bundle exec puma"
+    sh "rerun -c --ignore 'coverage/*' --ignore 'repostore/*' -- bundle exec puma -p 9292"
   end
 
+  desc 'Rackup for test'
   task :test do
-    sh sh "rerun -c --ignore 'coverage/*' --ignore 'repostore/*' -- bundle exec puma -p 9000"
+    sh "rerun -c --ignore 'coverage/*' --ignore 'repostore/*' -- RACK_ENV=test bundle exec puma -p 9000"
   end
 end
 
